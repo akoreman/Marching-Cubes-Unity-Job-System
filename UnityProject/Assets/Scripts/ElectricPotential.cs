@@ -23,6 +23,7 @@ public class ElectricPotential : MonoBehaviour
                 for (int k = 0; k < nZ; k++)
                 {
                     scalarField.Add(new ScalarFieldPoint(this, index, new Vector3Int(i, j, k)));
+                    index++;
                 }
     }
 

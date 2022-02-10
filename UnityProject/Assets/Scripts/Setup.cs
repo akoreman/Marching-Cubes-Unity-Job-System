@@ -6,9 +6,11 @@ public class Setup : MonoBehaviour
 {
     GameObject electricPotential;
 
-    public int nX = 100;
-    public int nY = 100;
-    public int nZ = 100;
+    public int nX = 10;
+    public int nY = 10;
+    public int nZ = 10;
+
+    public float thresholdValue = 0.5f;
 
     public Material m_material;
 
@@ -17,22 +19,35 @@ public class Setup : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        electricPotential = GameObject.Find("Electric Potential");
+        //electricPotential = GameObject.Find("Electric Potential");
+        electricPotential = this.gameObject;
 
-        PointCharge pointCharge = new PointCharge(new Vector3(1f,1f,1f), 1f);
+        PointCharge pointCharge = new PointCharge(new Vector3(5f,5f,5f), 1f);
 
         electricPotential.GetComponent<ElectricPotential>().RegisterCharge(pointCharge);
         electricPotential.GetComponent<ElectricPotential>().BuildScalarField(nX,nY,nZ);
 
+        /*
         foreach (ScalarFieldPoint x in electricPotential.GetComponent<ElectricPotential>().scalarField )
         {
             print(x.potential);
         }
+        */
+
+        List<Vector3> vertexList = new List<Vector3>();
+        List<int> indexList = new List<int>();
+
+
+
+        electricPotential.GetComponent<MarchingCubes>().GetVerticesFromField(electricPotential.GetComponent<ElectricPotential>().scalarField, thresholdValue, ref vertexList, ref indexList);
+
+
+
+
 
         List<Vector3> vertices = new List<Vector3>();
         List<int> indices = new List<int>();
 
-        int i = 0;
 
         vertices.Add(new Vector3(1f,2f,2f));
         vertices.Add(new Vector3(2f, 2f, 2f));
@@ -48,8 +63,10 @@ public class Setup : MonoBehaviour
 
 
         Mesh mesh = new Mesh();
-        mesh.SetVertices(vertices);
-        mesh.SetTriangles(indices, 0);
+        //mesh.SetVertices(vertices);
+        //mesh.SetTriangles(indices, 0);
+        mesh.SetVertices(vertexList);
+        mesh.SetTriangles(indexList, 0);
         mesh.RecalculateBounds();
         mesh.RecalculateNormals();
 

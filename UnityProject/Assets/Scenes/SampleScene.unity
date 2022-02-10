@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 705507994}
-  m_IndirectSpecularColor: {r: 0.44657898, g: 0.4964133, b: 0.5748178, a: 1}
+  m_IndirectSpecularColor: {r: 0.4465782, g: 0.49641252, b: 0.5748167, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -312,6 +312,7 @@ GameObject:
   - component: {fileID: 2134530634}
   - component: {fileID: 2134530636}
   - component: {fileID: 2134530635}
+  - component: {fileID: 2134530637}
   m_Layer: 0
   m_Name: Electric Potential
   m_TagString: Untagged
@@ -346,9 +347,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b7b033a779a1fe14e86a3bcc3d730665, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  nX: 5
-  nY: 5
-  nZ: 5
+  nX: 10
+  nY: 10
+  nZ: 10
+  thresholdValue: 0.5
   m_material: {fileID: 2100000, guid: d55cc7a698eead642be396d4c0451bb8, type: 2}
 --- !u!114 &2134530636
 MonoBehaviour:
@@ -360,5 +362,17 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 07013e283092eb545897cbcafe058b8a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &2134530637
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2134530631}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6cb9554539a75cc469fc5aa749d78c1b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
