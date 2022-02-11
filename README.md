@@ -1,10 +1,15 @@
 # Marching Cubes
 
-WIP. Implementation of the marching cubes algorithm to visualise scalar fields. Implemented using Unity3D.
+WIP. Implementation of the marching cubes algorithm to visualise scalar fields. Specifically to to make animations of metaball fluids. Implemented using Unity3D.
 
-**Currently Implemented:**
+**Currently implemented:**
 
-- Interpolated 3D marching cubes for visualising scalar fields.
+- Interpolated 3D marching cubes for visualising scalar fields (CPU).
+
+**To do:**
+
+- Fix normals to improve shading.
+- Convert to use compute shaders to speed up the algorithm.
 
 # Screenshots
 
