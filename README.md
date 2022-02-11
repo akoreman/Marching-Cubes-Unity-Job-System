@@ -1,3 +1,3 @@
-# Marching Cubes Gravitational Potential
+# Marching Cubes
 
-WIP. Visualisation of the gravitational potential of a collection of massive bodies using the marching cubes algorithm. Main goal is to visualise the Lagrange points. Implemented using Unity3D.
+WIP. Implementation of the marching cubes algorithm to visualise scalar fields. Implemented using Unity3D.
