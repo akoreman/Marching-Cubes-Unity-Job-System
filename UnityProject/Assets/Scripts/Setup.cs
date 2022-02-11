@@ -16,13 +16,16 @@ public class Setup : MonoBehaviour
 
     List<GameObject> meshes = new List<GameObject>();
 
+    Mesh mesh;
+    GameObject go;
+
     // Start is called before the first frame update
     void Start()
     {
         //electricPotential = GameObject.Find("Electric Potential");
         electricPotential = this.gameObject;
 
-        PointCharge pointCharge = new PointCharge(new Vector3(5f,5f,5f), 1f);
+        PointCharge pointCharge = new PointCharge(new Vector3(2f,2f,2f), 3f);
 
         electricPotential.GetComponent<ElectricPotential>().RegisterCharge(pointCharge);
         electricPotential.GetComponent<ElectricPotential>().BuildScalarField(nX,nY,nZ);
@@ -34,21 +37,24 @@ public class Setup : MonoBehaviour
         }
         */
 
-        List<Vector3> vertexList = new List<Vector3>();
-        List<int> indexList = new List<int>();
+        //List<Vector3> vertexList = new List<Vector3>();
+        //List<int> indexList = new List<int>();
 
 
 
-        electricPotential.GetComponent<MarchingCubes>().GetVerticesFromField(electricPotential.GetComponent<ElectricPotential>().scalarField, thresholdValue, ref vertexList, ref indexList);
+        //electricPotential.GetComponent<MarchingCubes>().GetVerticesFromField(electricPotential.GetComponent<ElectricPotential>().scalarField, thresholdValue, ref vertexList, ref indexList);
 
 
 
 
 
-        List<Vector3> vertices = new List<Vector3>();
-        List<int> indices = new List<int>();
+        //List<Vector3> vertices = new List<Vector3>();
+        //List<int> indices = new List<int>();
 
+        mesh = new Mesh();
+        go = new GameObject("Mesh");
 
+        /*
         vertices.Add(new Vector3(1f,2f,2f));
         vertices.Add(new Vector3(2f, 2f, 2f));
         vertices.Add(new Vector3(1f, 2f, 5f));
@@ -60,8 +66,8 @@ public class Setup : MonoBehaviour
         indices.Add(3);
         indices.Add(1);
         indices.Add(2);
-
-
+        */
+        /*
         Mesh mesh = new Mesh();
         //mesh.SetVertices(vertices);
         //mesh.SetTriangles(indices, 0);
@@ -79,8 +85,47 @@ public class Setup : MonoBehaviour
         go.transform.localPosition = new Vector3(0f, 0f, 0f);
 
         meshes.Add(go);
+        */
+
+    }
+
+    void  Update()
+    {
+        
+
+        //electricPotential.GetComponent<ElectricPotential>().BuildScalarField(nX, nY, nZ);
+
+        List<Vector3> vertexList = new List<Vector3>();
+        List<int> indexList = new List<int>();
 
 
+
+        electricPotential.GetComponent<MarchingCubes>().GetVerticesFromField(electricPotential.GetComponent<ElectricPotential>().scalarField, thresholdValue, ref vertexList, ref indexList);
+
+
+        //print(vertexList.Count);
+        //print(indexList.Count);
+
+        Mesh mesh = new Mesh();
+
+        mesh.SetVertices(vertexList);
+        mesh.SetTriangles(indexList, 0);
+        mesh.RecalculateBounds();
+        mesh.RecalculateNormals();
+
+        //Destroy(go);
+
+        go = new GameObject("Mesh");
+        go.transform.parent = transform;
+        go.AddComponent<MeshFilter>();
+        go.AddComponent<MeshRenderer>();
+        go.GetComponent<Renderer>().material = m_material;
+        go.GetComponent<MeshFilter>().mesh = mesh;
+        go.transform.localPosition = new Vector3(0f, 0f, 0f);
+
+        meshes.Add(go);
+
+        //print("yay");
     }
 
 }
