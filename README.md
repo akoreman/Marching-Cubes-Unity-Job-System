@@ -2,6 +2,10 @@
 
 WIP. Implementation of the marching cubes algorithm to visualise scalar fields. Implemented using Unity3D.
 
+**Currently Implemented:**
+
+- Interpolated 3D marching cubes for visualising scalar fields.
+
 # Screenshots
 
 **Metaballs**
