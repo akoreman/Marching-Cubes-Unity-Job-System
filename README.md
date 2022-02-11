@@ -8,7 +8,7 @@ WIP. Implementation of the marching cubes algorithm to visualise scalar fields. 
 
 **To do:**
 
-- Fix normals to improve shading.
+- Interpolate normals to improve shading.
 - Convert to use compute shaders to speed up the algorithm.
 
 # Screenshots
