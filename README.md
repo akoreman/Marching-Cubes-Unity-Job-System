@@ -17,4 +17,4 @@ WIP. Implementation of the marching cubes algorithm to visualise scalar fields. 
 
 <img src="https://raw.github.com/akoreman/Marching-Cubes-Metaballs/main/images/Metaballs.gif" width="400">
 
-<img src="https://raw.github.com/akoreman/Marching-Cubes-Metaballs/main/images/Fluid.gif" width="400">
+<img src="https://raw.github.com/akoreman/Marching-Cubes-Metaballs/main/images/fluid.gif" width="400">
