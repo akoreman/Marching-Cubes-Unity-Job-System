@@ -17,4 +17,10 @@ WIP. Implementation of the marching cubes algorithm to visualise scalar fields. 
 
 <img src="https://raw.github.com/akoreman/Marching-Cubes-Metaballs/main/images/Metaballs.gif" width="400">
 
+**Stream of metaballs for a fluid like effect**
+
 <img src="https://raw.github.com/akoreman/Marching-Cubes-Metaballs/main/images/fluid.gif" width="400">
+
+**Adding some randomness for a more natural effect**
+
+<img src="https://raw.github.com/akoreman/Marching-Cubes-Metaballs/main/images/FluidJitter.gif" width="400">
