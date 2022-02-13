@@ -1,6 +1,6 @@
 # Marching Cubes
 
-WIP. Implementation of the marching cubes algorithm to visualise scalar fields. Main goal is to create fluid-like effects. Implemented using Unity3D.
+WIP. Implementation of the marching cubes algorithm to visualise isolines of scalar fields. Main goal is to create fluid-like effects. Implemented using Unity3D.
 
 **Currently implemented:**
 
