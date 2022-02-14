@@ -35,10 +35,11 @@ public class Setup : MonoBehaviour
         marchingCubes.GetComponent<Potential>().BuildScalarField(nX, nY, nZ, gridSize);
 
         List<Vector3> vertexList = new List<Vector3>();
-        List<Vector3> normalList = new List<Vector3>();
+        List<Vector4> normalList = new List<Vector4>();
         List<int> indexList = new List<int>();
+        Dictionary<Vector3, int> vertexDict = new Dictionary<Vector3, int>();
 
-        marchingCubes.GetComponent<MarchingCubes>().GetVerticesFromField(marchingCubes.GetComponent<Potential>().scalarField, thresholdValue, ref vertexList, ref indexList, ref normalList);
+        marchingCubes.GetComponent<MarchingCubes>().GetVerticesFromField(marchingCubes.GetComponent<Potential>().scalarField, thresholdValue, ref vertexList, ref indexList, ref normalList, ref vertexDict);
 
         Mesh mesh = new Mesh();
 

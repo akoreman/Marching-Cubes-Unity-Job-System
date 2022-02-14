@@ -14,7 +14,7 @@ public class MarchingCubes : MonoBehaviour
     int nY;
     int nZ;
 
-    public void GetVerticesFromField (List<ScalarFieldPoint> scalarField, float thresholdValue, ref List<Vector3> vertexList, ref List<int> indexList, ref List<Vector3> normalList)
+    public void GetVerticesFromField (List<ScalarFieldPoint> scalarField, float thresholdValue, ref List<Vector3> vertexList, ref List<int> indexList, ref List<Vector4> normalList, ref Dictionary<Vector3, int> vertexDictionary)
     {
         marchingCubes = this.gameObject;
 
@@ -65,12 +65,12 @@ public class MarchingCubes : MonoBehaviour
                     if (cubeFlags[6].flag) { cubeIndex |= 64; }
                     if (cubeFlags[7].flag) { cubeIndex |= 128; }
 
-                    GetVerticesFromCube(cubeFlags, cubeIndex, ref vertexList, ref indexList, ref normalList, thresholdValue);
+                    GetVerticesFromCube(cubeFlags, cubeIndex, ref vertexList, ref indexList, ref normalList, ref vertexDictionary, thresholdValue);
                 }
 
     }
 
-    public void GetVerticesFromCube (flagNode[] cubeFlags, int cubeIndex, ref List<Vector3> vertexList, ref List<int> indexList, ref List<Vector3> normalList, float thresholdValue)
+    public void GetVerticesFromCube (flagNode[] cubeFlags, int cubeIndex, ref List<Vector3> vertexList, ref List<int> indexList, ref List<Vector4> normalList, ref Dictionary<Vector3, int> vertexDictionary, float thresholdValue)
     {
 
         if (edgeTable[cubeIndex] == 0)
@@ -116,9 +116,91 @@ public class MarchingCubes : MonoBehaviour
 
         for (int i = 0; triTable[cubeIndex,i] != -1; i += 3)
         {
+            // FOR WELDED VERTICES
+            int vertexCount = vertexList.Count;
 
-            int offset = indexList.Count;
+            List<int> triangleIndexList = new List<int>();
 
+            if (vertexDictionary.ContainsKey(edgeCutList[triTable[cubeIndex, i]]))
+            {
+                triangleIndexList.Add(vertexDictionary[edgeCutList[triTable[cubeIndex, i]]]);
+                /*
+                Vector3 edge0 = edgeCutList[triTable[cubeIndex, i + 2]] - edgeCutList[triTable[cubeIndex, i]];
+                Vector3 edge1 = edgeCutList[triTable[cubeIndex, i + 1]] - edgeCutList[triTable[cubeIndex, i]];
+
+                Vector3 newNormal = Vector3.Cross(edge0, edge1).normalized;
+                Vector4 oldNormal = normalList[vertexDictionary[edgeCutList[triTable[cubeIndex, i]]]];
+
+                float normalCounter = normalList[vertexDictionary[edgeCutList[triTable[cubeIndex, i]]]].z;
+
+                oldNormal.x = (normalCounter * oldNormal.x + newNormal.x) / (normalCounter + 1);
+                oldNormal.y = (normalCounter * oldNormal.y + newNormal.y) / (normalCounter + 1);
+                oldNormal.z = (normalCounter * oldNormal.z + newNormal.z) / (normalCounter + 1);
+                oldNormal.w = normalCounter + 1f;
+
+                normalList[vertexDictionary[edgeCutList[triTable[cubeIndex, i]]]] = oldNormal;
+                */
+            }
+            else
+            {
+                vertexList.Add(edgeCutList[triTable[cubeIndex, i]]);
+                vertexDictionary.Add(edgeCutList[triTable[cubeIndex, i]], vertexCount ); 
+                triangleIndexList.Add(vertexCount);
+
+                Vector3 edge0 = edgeCutList[triTable[cubeIndex, i + 2]]- edgeCutList[triTable[cubeIndex, i]];
+                Vector3 edge1 = edgeCutList[triTable[cubeIndex, i + 1]] - edgeCutList[triTable[cubeIndex, i]];
+
+                normalList.Add(Vector3.Cross(edge0,edge1).normalized);
+
+                vertexCount++;
+            }
+
+            if (vertexDictionary.ContainsKey(edgeCutList[triTable[cubeIndex, i + 1]]))
+            {
+                triangleIndexList.Add(vertexDictionary[edgeCutList[triTable[cubeIndex, i + 1]]]);
+            }
+            else
+            {
+                vertexList.Add(edgeCutList[triTable[cubeIndex, i + 1]]);
+                vertexDictionary.Add(edgeCutList[triTable[cubeIndex, i + 1]], vertexCount );
+                triangleIndexList.Add(vertexCount);
+
+                vertexCount++;
+            }
+
+            if (vertexDictionary.ContainsKey(edgeCutList[triTable[cubeIndex, i + 2]]))
+            {
+                triangleIndexList.Add(vertexDictionary[edgeCutList[triTable[cubeIndex, i + 2]]]);
+            }
+            else
+            {
+                vertexList.Add(edgeCutList[triTable[cubeIndex, i + 2]]);
+                vertexDictionary.Add(edgeCutList[triTable[cubeIndex, i + 2]], vertexCount );
+                triangleIndexList.Add(vertexCount);
+
+                vertexCount++;
+            }
+
+            if (thresholdValue > 0f)
+            {
+                indexList.Add(triangleIndexList[2]);
+                indexList.Add(triangleIndexList[1]);
+                indexList.Add(triangleIndexList[0]);
+            }
+            else
+            {
+                indexList.Add(triangleIndexList[0]);
+                indexList.Add(triangleIndexList[1]);
+                indexList.Add(triangleIndexList[2]);
+            }
+
+            // FOR NON WELDED VERTICES
+            //indexList.Add(triangleIndexList[0]);
+            //indexList.Add(triangleIndexList[1]);
+            //indexList.Add(triangleIndexList[2]);
+
+            /*
+            int offset = indexList.Count; 
             vertexList.Add(edgeCutList[triTable[cubeIndex,i  ]]);
             vertexList.Add(edgeCutList[triTable[cubeIndex,i+1]]);
             vertexList.Add(edgeCutList[triTable[cubeIndex,i+2]]);
@@ -135,9 +217,9 @@ public class MarchingCubes : MonoBehaviour
                 indexList.Add(offset + 1);
                 indexList.Add(offset + 2);
             }
-
+            */
         }
-        
+
     }
 
     public int GetLinearIndex (int i, int j, int k)
@@ -149,7 +231,6 @@ public class MarchingCubes : MonoBehaviour
 
     Vector3 interpolateVertices(float thresholdValue, Vector3 vertex0, Vector3 vertex1, float fieldValue0, float fieldValue1)
     {
-        
         float mu;
         Vector3 returnVector = new Vector3(0f,0f,0f);
 
