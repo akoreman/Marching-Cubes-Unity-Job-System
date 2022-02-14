@@ -5,6 +5,7 @@ WIP. Implementation of the marching cubes algorithm to visualise isolines of sca
 **Currently implemented:**
 
 - Interpolated 3D marching cubes for visualising scalar fields (CPU).
+- Vertex welding by using Dictionary lookups.
 
 **To do:**
 
