@@ -5,12 +5,12 @@ WIP. Implementation of the marching cubes algorithm to visualise isolines of sca
 **Currently implemented:**
 
 - Interpolated 3D marching cubes for visualising scalar fields (CPU).
-- Vertex welding by using dictionary lookups.
+- Vertex welding and normal interpolation by using dictionary lookups.
 - Support for varying scalar field drop-off for the ball charges to control interaction range.
 
 **To do:**
 
-- Interpolate normals to improve shading.
+- Port to either GPU or Unity job system
 
 
 # Screenshots
