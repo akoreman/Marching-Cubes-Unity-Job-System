@@ -10,7 +10,7 @@ Implementation of the marching cubes algorithm to visualise isolines of scalar f
 
 **To do:**
 
-- Port to either GPU or Unity job system
+- Port to either GPU or Unity job system.
 
 
 # Screenshots
