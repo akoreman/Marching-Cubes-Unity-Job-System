@@ -6,6 +6,7 @@ Implementation of the marching cubes algorithm to visualise isolines of scalar f
 
 - Interpolated 3D marching cubes for visualising scalar fields (CPU).
 - Vertex welding and normal interpolation by using dictionary lookups.
+- Support for varying cube size and number for speed/resolution trade-off.
 - Support for varying scalar field drop-off for the ball charges to control interaction range.
 
 **To do:**
