@@ -123,7 +123,10 @@ public class MarchingCubes : MonoBehaviour
             Vector3 edge0 = edgeCutList[triTable[cubeIndex, i + 1]] - edgeCutList[triTable[cubeIndex, i]];
             Vector3 edge1 = edgeCutList[triTable[cubeIndex, i + 2]] - edgeCutList[triTable[cubeIndex, i]];
 
-            Vector3 newNormal = Vector3.Cross(edge0, edge1).normalized;
+            Vector3 triangleNormal =  Vector3.Cross(edge1, edge0);
+            triangleNormal.Normalize();
+
+            
 
             // FOR WELDED VERTICES
             if (vertexWelding)
@@ -136,7 +139,7 @@ public class MarchingCubes : MonoBehaviour
                 {
                     triangleIndexList.Add(vertexDictionary[edgeCutList[triTable[cubeIndex, i]]]);
                     
-                    normalList[vertexDictionary[edgeCutList[triTable[cubeIndex, i]]]] += newNormal;
+                    normalList[vertexDictionary[edgeCutList[triTable[cubeIndex, i]]]] += triangleNormal;
                 }
                 else
                 {
@@ -144,7 +147,7 @@ public class MarchingCubes : MonoBehaviour
                     vertexDictionary.Add(edgeCutList[triTable[cubeIndex, i]], vertexCount);
                     triangleIndexList.Add(vertexCount);
 
-                    normalList.Add(newNormal);
+                    normalList.Add(triangleNormal);
 
                     vertexCount++;
                 }
@@ -155,7 +158,7 @@ public class MarchingCubes : MonoBehaviour
                     
                     
 
-                    normalList[vertexDictionary[edgeCutList[triTable[cubeIndex, i + 1]]]] += newNormal;
+                    normalList[vertexDictionary[edgeCutList[triTable[cubeIndex, i + 1]]]] += triangleNormal;
                     
                 }
                 else
@@ -164,7 +167,7 @@ public class MarchingCubes : MonoBehaviour
                     vertexDictionary.Add(edgeCutList[triTable[cubeIndex, i + 1]], vertexCount);
                     triangleIndexList.Add(vertexCount);
 
-                    normalList.Add(newNormal);
+                    normalList.Add(triangleNormal);
 
                     vertexCount++;
                 }
@@ -173,7 +176,7 @@ public class MarchingCubes : MonoBehaviour
                 {
                     triangleIndexList.Add(vertexDictionary[edgeCutList[triTable[cubeIndex, i + 2]]]);
                     
-                    normalList[vertexDictionary[edgeCutList[triTable[cubeIndex, i + 2]]]] += newNormal;
+                    normalList[vertexDictionary[edgeCutList[triTable[cubeIndex, i + 2]]]] += triangleNormal;
                     
                 }
                 else
@@ -182,7 +185,7 @@ public class MarchingCubes : MonoBehaviour
                     vertexDictionary.Add(edgeCutList[triTable[cubeIndex, i + 2]], vertexCount);
                     triangleIndexList.Add(vertexCount);
 
-                    normalList.Add(newNormal);
+                    normalList.Add(triangleNormal);
 
                     vertexCount++;
                 }
@@ -207,6 +210,10 @@ public class MarchingCubes : MonoBehaviour
                 vertexList.Add(edgeCutList[triTable[cubeIndex,i  ]]);
                 vertexList.Add(edgeCutList[triTable[cubeIndex,i+1]]);
                 vertexList.Add(edgeCutList[triTable[cubeIndex,i+2]]);
+
+                normalList.Add( triangleNormal);
+                normalList.Add( triangleNormal);
+                normalList.Add( triangleNormal);
 
                 if (thresholdValue > 0f)
                 {

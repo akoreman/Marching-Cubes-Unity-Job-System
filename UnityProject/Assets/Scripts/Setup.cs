@@ -44,10 +44,9 @@ public class Setup : MonoBehaviour
 
         mesh.SetVertices(vertexList);
         mesh.SetTriangles(indexList, 0);
-
-        
-
         mesh.normals = NormalizedArrayFromList(normalList);
+
+        //mesh.RecalculateNormals();
 
         Destroy(meshGameObject);
 
@@ -73,6 +72,8 @@ public class Setup : MonoBehaviour
             normal.x = input[i].x;
             normal.y = input[i].y;
             normal.z = input[i].z;
+
+            //print(input[i]);
 
             output[i] = normal.normalized;
         }
