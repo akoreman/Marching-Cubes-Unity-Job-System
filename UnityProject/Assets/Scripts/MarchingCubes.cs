@@ -8,13 +8,16 @@ using System;
 
 public class MarchingCubes : MonoBehaviour
 {
+    public bool vertexWelding = true;
+    public bool vertexInterpolation = true;
+
     GameObject marchingCubes;
 
     int nX;
     int nY;
     int nZ;
 
-    public void GetVerticesFromField (List<ScalarFieldPoint> scalarField, float thresholdValue, ref List<Vector3> vertexList, ref List<int> indexList, ref List<Vector4> normalList, ref Dictionary<Vector3, int> vertexDictionary)
+    public void GetVerticesFromField (List<ScalarFieldPoint> scalarField, float thresholdValue, ref List<Vector3> vertexList, ref List<int> indexList, ref List<Vector3> normalList, ref Dictionary<Vector3, int> vertexDictionary)
     {
         marchingCubes = this.gameObject;
 
@@ -65,14 +68,14 @@ public class MarchingCubes : MonoBehaviour
                     if (cubeFlags[6].flag) { cubeIndex |= 64; }
                     if (cubeFlags[7].flag) { cubeIndex |= 128; }
 
-                    GetVerticesFromCube(cubeFlags, cubeIndex, ref vertexList, ref indexList, ref normalList, ref vertexDictionary, thresholdValue);
+                    GetVerticesFromCube(cubeFlags, cubeIndex, thresholdValue, ref vertexList, ref indexList, ref normalList, ref vertexDictionary );
+                    //GetVerticesFromCube(cubeFlags, cubeIndex, thresholdValue, ref vertexList, ref indexList, ref normals, ref vertexDictionary);
                 }
 
     }
 
-    public void GetVerticesFromCube (flagNode[] cubeFlags, int cubeIndex, ref List<Vector3> vertexList, ref List<int> indexList, ref List<Vector4> normalList, ref Dictionary<Vector3, int> vertexDictionary, float thresholdValue)
+    public void GetVerticesFromCube (flagNode[] cubeFlags, int cubeIndex, float thresholdValue, ref List<Vector3> vertexList, ref List<int> indexList, ref List<Vector3> normalList, ref Dictionary<Vector3, int> vertexDictionary)
     {
-
         if (edgeTable[cubeIndex] == 0)
             return;
 
@@ -116,110 +119,109 @@ public class MarchingCubes : MonoBehaviour
 
         for (int i = 0; triTable[cubeIndex,i] != -1; i += 3)
         {
+            // Find the normal of this specific triangle.
+            Vector3 edge0 = edgeCutList[triTable[cubeIndex, i + 1]] - edgeCutList[triTable[cubeIndex, i]];
+            Vector3 edge1 = edgeCutList[triTable[cubeIndex, i + 2]] - edgeCutList[triTable[cubeIndex, i]];
+
+            Vector3 newNormal = Vector3.Cross(edge0, edge1).normalized;
+
             // FOR WELDED VERTICES
-            int vertexCount = vertexList.Count;
-
-            List<int> triangleIndexList = new List<int>();
-
-            if (vertexDictionary.ContainsKey(edgeCutList[triTable[cubeIndex, i]]))
+            if (vertexWelding)
             {
-                triangleIndexList.Add(vertexDictionary[edgeCutList[triTable[cubeIndex, i]]]);
-                /*
-                Vector3 edge0 = edgeCutList[triTable[cubeIndex, i + 2]] - edgeCutList[triTable[cubeIndex, i]];
-                Vector3 edge1 = edgeCutList[triTable[cubeIndex, i + 1]] - edgeCutList[triTable[cubeIndex, i]];
+                int vertexCount = vertexList.Count;
 
-                Vector3 newNormal = Vector3.Cross(edge0, edge1).normalized;
-                Vector4 oldNormal = normalList[vertexDictionary[edgeCutList[triTable[cubeIndex, i]]]];
+                List<int> triangleIndexList = new List<int>();
 
-                float normalCounter = normalList[vertexDictionary[edgeCutList[triTable[cubeIndex, i]]]].z;
+                if (vertexDictionary.ContainsKey( edgeCutList[triTable[cubeIndex, i]]))
+                {
+                    triangleIndexList.Add(vertexDictionary[edgeCutList[triTable[cubeIndex, i]]]);
+                    
+                    normalList[vertexDictionary[edgeCutList[triTable[cubeIndex, i]]]] += newNormal;
+                }
+                else
+                {
+                    vertexList.Add(edgeCutList[triTable[cubeIndex, i]]);
+                    vertexDictionary.Add(edgeCutList[triTable[cubeIndex, i]], vertexCount);
+                    triangleIndexList.Add(vertexCount);
 
-                oldNormal.x = (normalCounter * oldNormal.x + newNormal.x) / (normalCounter + 1);
-                oldNormal.y = (normalCounter * oldNormal.y + newNormal.y) / (normalCounter + 1);
-                oldNormal.z = (normalCounter * oldNormal.z + newNormal.z) / (normalCounter + 1);
-                oldNormal.w = normalCounter + 1f;
+                    normalList.Add(newNormal);
 
-                normalList[vertexDictionary[edgeCutList[triTable[cubeIndex, i]]]] = oldNormal;
-                */
+                    vertexCount++;
+                }
+
+                if (vertexDictionary.ContainsKey(edgeCutList[triTable[cubeIndex, i + 1]]))
+                {
+                    triangleIndexList.Add(vertexDictionary[edgeCutList[triTable[cubeIndex, i + 1]]]);
+                    
+                    
+
+                    normalList[vertexDictionary[edgeCutList[triTable[cubeIndex, i + 1]]]] += newNormal;
+                    
+                }
+                else
+                {
+                    vertexList.Add(edgeCutList[triTable[cubeIndex, i + 1]]);
+                    vertexDictionary.Add(edgeCutList[triTable[cubeIndex, i + 1]], vertexCount);
+                    triangleIndexList.Add(vertexCount);
+
+                    normalList.Add(newNormal);
+
+                    vertexCount++;
+                }
+
+                if (vertexDictionary.ContainsKey(edgeCutList[triTable[cubeIndex, i + 2]]))
+                {
+                    triangleIndexList.Add(vertexDictionary[edgeCutList[triTable[cubeIndex, i + 2]]]);
+                    
+                    normalList[vertexDictionary[edgeCutList[triTable[cubeIndex, i + 2]]]] += newNormal;
+                    
+                }
+                else
+                {
+                    vertexList.Add(edgeCutList[triTable[cubeIndex, i + 2]]);
+                    vertexDictionary.Add(edgeCutList[triTable[cubeIndex, i + 2]], vertexCount);
+                    triangleIndexList.Add(vertexCount);
+
+                    normalList.Add(newNormal);
+
+                    vertexCount++;
+                }
+
+                if (thresholdValue > 0f)
+                {
+                    indexList.Add(triangleIndexList[2]);
+                    indexList.Add(triangleIndexList[1]);
+                    indexList.Add(triangleIndexList[0]);
+                }
+                else
+                {
+                    indexList.Add(triangleIndexList[0]);
+                    indexList.Add(triangleIndexList[1]);
+                    indexList.Add(triangleIndexList[2]);
+                }
             }
             else
             {
-                vertexList.Add(edgeCutList[triTable[cubeIndex, i]]);
-                vertexDictionary.Add(edgeCutList[triTable[cubeIndex, i]], vertexCount ); 
-                triangleIndexList.Add(vertexCount);
+                // FOR NON WELDED VERTICES            
+                int offset = indexList.Count; 
+                vertexList.Add(edgeCutList[triTable[cubeIndex,i  ]]);
+                vertexList.Add(edgeCutList[triTable[cubeIndex,i+1]]);
+                vertexList.Add(edgeCutList[triTable[cubeIndex,i+2]]);
 
-                Vector3 edge0 = edgeCutList[triTable[cubeIndex, i + 2]]- edgeCutList[triTable[cubeIndex, i]];
-                Vector3 edge1 = edgeCutList[triTable[cubeIndex, i + 1]] - edgeCutList[triTable[cubeIndex, i]];
-
-                normalList.Add(Vector3.Cross(edge0,edge1).normalized);
-
-                vertexCount++;
+                if (thresholdValue > 0f)
+                {
+                    indexList.Add(offset + 2);
+                    indexList.Add(offset + 1);
+                    indexList.Add(offset + 0);
+                }
+                else
+                {
+                    indexList.Add(offset + 0);
+                    indexList.Add(offset + 1);
+                    indexList.Add(offset + 2);
+                }       
             }
-
-            if (vertexDictionary.ContainsKey(edgeCutList[triTable[cubeIndex, i + 1]]))
-            {
-                triangleIndexList.Add(vertexDictionary[edgeCutList[triTable[cubeIndex, i + 1]]]);
-            }
-            else
-            {
-                vertexList.Add(edgeCutList[triTable[cubeIndex, i + 1]]);
-                vertexDictionary.Add(edgeCutList[triTable[cubeIndex, i + 1]], vertexCount );
-                triangleIndexList.Add(vertexCount);
-
-                vertexCount++;
-            }
-
-            if (vertexDictionary.ContainsKey(edgeCutList[triTable[cubeIndex, i + 2]]))
-            {
-                triangleIndexList.Add(vertexDictionary[edgeCutList[triTable[cubeIndex, i + 2]]]);
-            }
-            else
-            {
-                vertexList.Add(edgeCutList[triTable[cubeIndex, i + 2]]);
-                vertexDictionary.Add(edgeCutList[triTable[cubeIndex, i + 2]], vertexCount );
-                triangleIndexList.Add(vertexCount);
-
-                vertexCount++;
-            }
-
-            if (thresholdValue > 0f)
-            {
-                indexList.Add(triangleIndexList[2]);
-                indexList.Add(triangleIndexList[1]);
-                indexList.Add(triangleIndexList[0]);
-            }
-            else
-            {
-                indexList.Add(triangleIndexList[0]);
-                indexList.Add(triangleIndexList[1]);
-                indexList.Add(triangleIndexList[2]);
-            }
-
-            // FOR NON WELDED VERTICES
-            //indexList.Add(triangleIndexList[0]);
-            //indexList.Add(triangleIndexList[1]);
-            //indexList.Add(triangleIndexList[2]);
-
-            /*
-            int offset = indexList.Count; 
-            vertexList.Add(edgeCutList[triTable[cubeIndex,i  ]]);
-            vertexList.Add(edgeCutList[triTable[cubeIndex,i+1]]);
-            vertexList.Add(edgeCutList[triTable[cubeIndex,i+2]]);
-
-            if (thresholdValue > 0f)
-            {
-                indexList.Add(offset + 2);
-                indexList.Add(offset + 1);
-                indexList.Add(offset + 0);
-            }
-            else
-            {
-                indexList.Add(offset + 0);
-                indexList.Add(offset + 1);
-                indexList.Add(offset + 2);
-            }
-            */
         }
-
     }
 
     public int GetLinearIndex (int i, int j, int k)
@@ -231,23 +233,74 @@ public class MarchingCubes : MonoBehaviour
 
     Vector3 interpolateVertices(float thresholdValue, Vector3 vertex0, Vector3 vertex1, float fieldValue0, float fieldValue1)
     {
-        float mu;
-        Vector3 returnVector = new Vector3(0f,0f,0f);
+        if (vertexInterpolation)
+        {
+            /*
+            if (LessThan(vertex1, vertex0))
+            {
+                Vector3 temp = vertex0;
+                vertex0 = vertex1;
+                vertex1 = temp;
+            }
+            */
 
-        if (Mathf.Abs(thresholdValue - fieldValue0) < 0.00001)
-            return vertex0;
+            float mu;
+            Vector3 returnVector = new Vector3(0f, 0f, 0f);
 
-        if (Mathf.Abs(thresholdValue - fieldValue1) < 0.00001)
-            return vertex1;
+            if (Mathf.Abs(thresholdValue - fieldValue0) < 0.00001)
+                return vertex0;
 
-        mu = (thresholdValue - fieldValue0) / (fieldValue1 - fieldValue0);
+            if (Mathf.Abs(thresholdValue - fieldValue1) < 0.00001)
+                return vertex1;
 
-        returnVector.x = vertex0.x + mu * (vertex1.x - vertex0.x);
-        returnVector.y = vertex0.y + mu * (vertex1.y - vertex0.y);
-        returnVector.z = vertex0.z + mu * (vertex1.z - vertex0.z);
+            if (Mathf.Abs(fieldValue0 - fieldValue1) < 0.00001)
+                return vertex0;
 
-        return returnVector;
+            mu = (thresholdValue - fieldValue0) / (fieldValue1 - fieldValue0);
+
+            returnVector.x = vertex0.x + mu * (vertex1.x - vertex0.x);
+            returnVector.y = vertex0.y + mu * (vertex1.y - vertex0.y);
+            returnVector.z = vertex0.z + mu * (vertex1.z - vertex0.z);
+
+            
+
+            return returnVector;
+
+        }
+        else
+        {
+            Vector3 returnVector = new Vector3(0f, 0f, 0f);
+
+            returnVector.x = (vertex0.x + vertex1.x) / 2;
+            returnVector.y = (vertex0.y + vertex1.y) / 2;
+            returnVector.z = (vertex0.z + vertex1.z) / 2;
+
+            return returnVector;
+        }
+
     }
+
+    public static bool LessThan(Vector3 a, Vector3 b)
+    {
+        if (a.x < b.x)
+            return true;
+        else if (a.x > b.x)
+            return false;
+
+        if (a.y < b.y)
+            return true;
+        else if (a.y > b.y)
+            return false;
+
+        if (a.z < b.z)
+            return true;
+        else if (a.z > b.z)
+            return false;
+
+        return false;
+    }
+
+
 
 
     // Table from http://paulbourke.net/geometry/polygonise/ .

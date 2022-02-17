@@ -496,7 +496,7 @@ MonoBehaviour:
   nZ: 40
   gridSize: 0.5
   thresholdValue: 1.6
-  m_material: {fileID: 2100000, guid: d55cc7a698eead642be396d4c0451bb8, type: 2}
+  meshMaterial: {fileID: 2100000, guid: d55cc7a698eead642be396d4c0451bb8, type: 2}
 --- !u!114 &2134530636
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -509,6 +509,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 07013e283092eb545897cbcafe058b8a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  fieldExponent: 1
 --- !u!114 &2134530637
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -521,3 +522,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6cb9554539a75cc469fc5aa749d78c1b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  vertexWelding: 1
+  vertexInterpolation: 1
