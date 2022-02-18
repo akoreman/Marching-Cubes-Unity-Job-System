@@ -1,6 +1,6 @@
 # Marching Cubes
 
-Implementation of the marching cubes algorithm to visualise isolines of scalar fields.  Implemented using Unity3D and multithreaded using the Unity Job System.
+Implementation of the marching cubes algorithm to visualise isolines of scalar fields.  Implemented using Unity3D and multithreaded using the Unity Job System with the Unity Burst compiler.
 
 **Currently implemented:**
 
