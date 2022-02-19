@@ -40,8 +40,6 @@ public class Setup : MonoBehaviour
     {
         marchingCubes = this.gameObject;
         marchingCubes.GetComponent<Potential>().BuildScalarField(nX,nY,nZ, gridSize);
-
-        //UpdateMesh();
     }
 
     void Update()
@@ -117,7 +115,6 @@ public class Setup : MonoBehaviour
             Vector3 edge1 = triangle.vertex2 - triangle.vertex0;
 
             Vector3 triangleNormal = Vector3.Cross(edge1, edge0).normalized;
-
 
             // FOR WELDED VERTICES
             if (vertexWelding)

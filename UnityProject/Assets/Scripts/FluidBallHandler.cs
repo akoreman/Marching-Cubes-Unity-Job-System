@@ -17,7 +17,8 @@ public class FluidBallHandler : MonoBehaviour
 
     void Start()
     {
-        pointCharge = new PointCharge(this.transform.position, charge);
+        pointCharge.position = this.transform.position;
+        pointCharge.charge = charge;
 
         marchingCubes.GetComponent<Potential>().RegisterCharge(pointCharge);
     }
@@ -26,7 +27,8 @@ public class FluidBallHandler : MonoBehaviour
     {
         marchingCubes.GetComponent<Potential>().RemoveCharge(pointCharge);
 
-        pointCharge = new PointCharge(this.transform.position, charge);
+        pointCharge.position = this.transform.position;
+        pointCharge.charge = charge;
 
         marchingCubes.GetComponent<Potential>().RegisterCharge(pointCharge);
     }

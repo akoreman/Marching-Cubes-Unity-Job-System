@@ -30,8 +30,14 @@ public class Potential : MonoBehaviour
             for (int j = 0; j < nY; j++)
                 for (int k = 0; k < nZ; k++)
                 {
-                    scalarField.Add(new ScalarFieldPoint(this, new Vector3(i * gridSize, j * gridSize, k * gridSize)));
+                    ScalarFieldPoint scalarFieldPoint;
+
+                    scalarFieldPoint.position = new Vector3(i * gridSize, j * gridSize, k * gridSize);
+                    scalarFieldPoint.potential = GetPotential(scalarFieldPoint.position);
+                    
+                    scalarField.Add(scalarFieldPoint);
                 }
+
     }
 
     public float GetPotential(Vector3 Position)
@@ -49,19 +55,14 @@ public class Potential : MonoBehaviour
 
 }
 
-public class ScalarFieldPoint
+
+public struct ScalarFieldPoint
 {
     public Vector3 position;
     public float potential;
-
-    public ScalarFieldPoint(Potential potential, Vector3 position)
-    {
-        this.position = position;
-        this.potential = potential.GetPotential(this.position);
-    }
 }
 
-
+/*
 public class PointCharge
 {
     public Vector3 position;
@@ -72,4 +73,11 @@ public class PointCharge
         this.position = position;
         this.charge = charge;
     }
+}
+*/
+
+public struct PointCharge
+{
+    public Vector3 position;
+    public float charge;
 }
