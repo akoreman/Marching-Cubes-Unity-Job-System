@@ -41,7 +41,7 @@ public class Setup : MonoBehaviour
         marchingCubes = this.gameObject;
         marchingCubes.GetComponent<Potential>().BuildScalarField(nX,nY,nZ, gridSize);
 
-        UpdateMesh();
+        //UpdateMesh();
     }
 
     void Update()
@@ -63,7 +63,7 @@ public class Setup : MonoBehaviour
 
         triangleQueue.Dispose();
         marchingCubes.GetComponent<MarchingCubes>().flagList.Dispose();
-        marchingCubes.GetComponent<MarchingCubes>().triTableOneDim.Dispose(); 
+
         Mesh mesh = new Mesh();
 
         mesh.SetVertices(vertexList);
