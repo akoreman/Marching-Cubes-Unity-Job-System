@@ -289,6 +289,7 @@ MonoBehaviour:
   gridSize: 0.5
   thresholdValue: 0.5
   meshMaterial: {fileID: 2100000, guid: d55cc7a698eead642be396d4c0451bb8, type: 2}
+  vertexWelding: 1
 --- !u!114 &1024850814
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -316,6 +317,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   vertexWelding: 1
   vertexInterpolation: 1
+  useJobSystem: 1
 --- !u!4 &1024850816
 Transform:
   m_ObjectHideFlags: 0

@@ -59,7 +59,8 @@ public class Setup : MonoBehaviour
         CreateVertexIndexNormalListsFromTriangles(triangleQueue, ref vertexList, ref indexList, ref normalList, ref vertexDict);
 
         triangleQueue.Dispose();
-
+        marchingCubes.GetComponent<MarchingCubes>().flagList.Dispose();
+        marchingCubes.GetComponent<MarchingCubes>().triTableOneDim.Dispose(); 
         Mesh mesh = new Mesh();
 
         mesh.SetVertices(vertexList);
