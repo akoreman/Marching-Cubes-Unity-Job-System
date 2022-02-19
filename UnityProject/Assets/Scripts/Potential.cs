@@ -41,8 +41,6 @@ public class Potential : MonoBehaviour
         // Choose between 1/r and 1/r^2 drop-off.
         foreach (PointCharge x in chargesInScene)
         {
-            potential += x.charge / ((Position - x.position).magnitude * (Position - x.position).magnitude);
-            //potential += x.charge / (Position - x.position).magnitude ;
             potential += x.charge / Mathf.Pow((Position - x.position).magnitude, fieldExponent);
         }
 

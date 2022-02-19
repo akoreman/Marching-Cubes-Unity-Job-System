@@ -25,11 +25,7 @@ public class Setup : MonoBehaviour
     public Material meshMaterial;
 
     public bool vertexWelding = true;
-
-    List<GameObject> meshes = new List<GameObject>();
-
  
-    [Unity.Collections.WriteOnly]
     public NativeQueue<Triangle> triangleQueue;
 
     List<Vector3> vertexList;
@@ -51,6 +47,13 @@ public class Setup : MonoBehaviour
     void Update()
     {
         UpdateMesh();
+
+        Destroy(meshGameObject);
+        meshGameObject = new GameObject("Marching Cubes Mesh");
+        meshGameObject.transform.parent = transform;
+        meshGameObject.AddComponent<MeshFilter>();
+        meshGameObject.AddComponent<MeshRenderer>();
+        meshGameObject.GetComponent<Renderer>().material = meshMaterial;
     }
 
     void LateUpdate()
@@ -67,19 +70,7 @@ public class Setup : MonoBehaviour
         mesh.SetTriangles(indexList, 0);
         mesh.normals = NormalizedArrayFromList(normalList);
 
-        //mesh.RecalculateNormals();
-
-        Destroy(meshGameObject);
-
-        meshGameObject = new GameObject("Marching Cubes Mesh");
-        meshGameObject.transform.parent = transform;
-        meshGameObject.AddComponent<MeshFilter>();
-        meshGameObject.AddComponent<MeshRenderer>();
-        meshGameObject.GetComponent<Renderer>().material = meshMaterial;
         meshGameObject.GetComponent<MeshFilter>().mesh = mesh;
-        //meshGameObject.transform.localPosition = new Vector3(0f, 0f, 0f);
-
-        meshes.Add(meshGameObject);
     }
 
     void  UpdateMesh()
@@ -92,44 +83,12 @@ public class Setup : MonoBehaviour
         normalList = new List<Vector3>();
         indexList = new List<int>();
 
-        //List<Triangle> triangleList = new List<Triangle>();
-
-        triangleQueue = new NativeQueue<Triangle>(Allocator.Persistent);
-
-        //marchingCubes.GetComponent<MarchingCubes>().GetVerticesFromField(marchingCubes.GetComponent<Potential>().scalarField, thresholdValue, ref vertexList, ref indexList, ref normalList, ref vertexDict);
-        //marchingCubes.GetComponent<MarchingCubes>().GetVerticesFromField(marchingCubes.GetComponent<Potential>().scalarField, thresholdValue, ref triangleList);
+        triangleQueue = new NativeQueue<Triangle>(Allocator.TempJob);
 
         marchingCubes.GetComponent<MarchingCubes>().GetVerticesFromField(marchingCubes.GetComponent<Potential>().scalarField, thresholdValue);
-
-        //Mesh mesh = new Mesh();
-
-
-        //marchingCubes.GetComponent<MarchingCubes>().triangleListModificationJobHandle.Complete();
-        //CreateVertexIndexNormalListsFromTriangles(triangleQueue, ref vertexList, ref indexList, ref normalList, ref vertexDict);
-
-        //triangleList.Dispose();
-        //triangleQueue.Dispose();
-
-        //mesh.SetVertices(vertexList);
-        //mesh.SetTriangles(indexList, 0);
-        //mesh.normals = NormalizedArrayFromList(normalList);
-
-        //mesh.RecalculateNormals();
-
-        //Destroy(meshGameObject);
-
-        //meshGameObject = new GameObject("Marching Cubes Mesh");
-        //meshGameObject.transform.parent = transform;
-        //meshGameObject.AddComponent<MeshFilter>();
-        //meshGameObject.AddComponent<MeshRenderer>();
-        //meshGameObject.GetComponent<Renderer>().material = meshMaterial;
-        //meshGameObject.GetComponent<MeshFilter>().mesh = mesh;
-        //meshGameObject.transform.localPosition = new Vector3(0f, 0f, 0f);
-
-        //meshes.Add(meshGameObject);
-
     }
 
+    // This function takes a List<Vector3> of vectors and returns an array of Vector3's for sending to a mesh as normals.
     Vector3[] NormalizedArrayFromList(List<Vector3> input)
     {
         Vector3[] output = new Vector3[input.Count];
@@ -141,14 +100,13 @@ public class Setup : MonoBehaviour
             normal.y = input[i].y;
             normal.z = input[i].z;
 
-            //print(input[i]);
-
             output[i] = normal.normalized;
         }
 
         return output;
     }
 
+    // This function takes the NativeQueue filled with all the triangles of a mesh and adds welded vertices, indices and interpolated normals to the respective lists.
     void CreateVertexIndexNormalListsFromTriangles(NativeQueue<Triangle> triangleList, ref List<Vector3> vertexList, ref List<int> indexList, ref List<Vector3> normalList, ref Dictionary<Vector3, int> vertexDictionary)
     {
         while(triangleList.Count > 0)

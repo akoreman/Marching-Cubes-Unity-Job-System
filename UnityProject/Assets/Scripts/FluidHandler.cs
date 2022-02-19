@@ -15,7 +15,6 @@ public class FluidHandler : MonoBehaviour
         marchingCubes = GameObject.Find("Marching Cubes");
     }
 
-    // Start is called before the first frame update
     void Start()
     {
         InvokeRepeating("LaunchFluidBall", 1.0f, .3f);
