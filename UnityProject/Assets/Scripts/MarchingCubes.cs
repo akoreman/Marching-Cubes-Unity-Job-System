@@ -43,22 +43,11 @@ public class MarchingCubes : MonoBehaviour
 
         foreach (ScalarFieldPoint x in marchingCubes.GetComponent<Potential>().scalarField)
         {
-            if (x.potential > thresholdValue)
-            {
-                flagNode flag;
-                flag.flag = true;
-                flag.position = x.position;
-                flag.fieldValue = x.potential;
-                flagList.Add(flag);
-            }
-            else
-            {
-                flagNode flag;
-                flag.flag = false;
-                flag.position = x.position;
-                flag.fieldValue = x.potential;
-                flagList.Add(flag);
-            }
+            flagNode flag;
+            flag.flag = x.potential > thresholdValue;
+            flag.position = x.position;
+            flag.fieldValue = x.potential;
+            flagList.Add(flag);
         }
 
         
@@ -145,10 +134,10 @@ public class MarchingCubes : MonoBehaviour
         
         float3 interpolateVertices(float thresholdValue, Vector3 vertex0, Vector3 vertex1, float fieldValue0, float fieldValue1)
         {
+            float3 returnVector = new float3(0f, 0f, 0f);
+
             if (vertexInterpolation)
             {
-                float mu;
-                float3 returnVector = new float3(0f, 0f, 0f);
 
                 if (Mathf.Abs(thresholdValue - fieldValue0) < 0.00001)
                     return vertex0;
@@ -159,26 +148,22 @@ public class MarchingCubes : MonoBehaviour
                 if (Mathf.Abs(fieldValue0 - fieldValue1) < 0.00001)
                     return vertex0;
 
-                mu = (thresholdValue - fieldValue0) / (fieldValue1 - fieldValue0);
+                float mu = (thresholdValue - fieldValue0) / (fieldValue1 - fieldValue0);
 
                 returnVector.x = vertex0.x + mu * (vertex1.x - vertex0.x);
                 returnVector.y = vertex0.y + mu * (vertex1.y - vertex0.y);
                 returnVector.z = vertex0.z + mu * (vertex1.z - vertex0.z);
 
-                return returnVector;
-
             }
             else
             {
-                Vector3 returnVector = new float3(0f, 0f, 0f);
-
                 returnVector.x = (vertex0.x + vertex1.x) / 2;
                 returnVector.y = (vertex0.y + vertex1.y) / 2;
                 returnVector.z = (vertex0.z + vertex1.z) / 2;
 
-                return returnVector;
             }
 
+            return returnVector;
         }
         
 
@@ -186,69 +171,27 @@ public class MarchingCubes : MonoBehaviour
         {
             int cubeIndex = 0;
 
-            NativeArray<flagNode> cubeFlags = new NativeArray<flagNode>(8, Allocator.Temp);
-
-            cubeFlags[0] = flagList[GetLinearIndex(i, j, k)];
-            cubeFlags[1] = flagList[GetLinearIndex(i + 1, j, k)];
-            cubeFlags[2] = flagList[GetLinearIndex(i + 1, j + 1, k)];
-            cubeFlags[3] = flagList[GetLinearIndex(i, j + 1, k)];
-            cubeFlags[4] = flagList[GetLinearIndex(i, j, k + 1)];
-            cubeFlags[5] = flagList[GetLinearIndex(i + 1, j, k + 1)];
-            cubeFlags[6] = flagList[GetLinearIndex(i + 1, j + 1, k + 1)];
-            cubeFlags[7] = flagList[GetLinearIndex(i, j + 1, k + 1)];
+            NativeArray<flagNode> cubeFlags = GetCubeFlags(i, j, k);
 
             // a |= b shorthand for a = a | b with | the bitwise OR operator.
-            if (cubeFlags[0].flag) { cubeIndex |= 1; }
-            if (cubeFlags[1].flag) { cubeIndex |= 2; }
-            if (cubeFlags[2].flag) { cubeIndex |= 4; }
-            if (cubeFlags[3].flag) { cubeIndex |= 8; }
-            if (cubeFlags[4].flag) { cubeIndex |= 16; }
-            if (cubeFlags[5].flag) { cubeIndex |= 32; }
-            if (cubeFlags[6].flag) { cubeIndex |= 64; }
-            if (cubeFlags[7].flag) { cubeIndex |= 128; }
+            // 1 << n bitshifts the number 1 (0b_0000_0001) n bits to the left
+            for (int n = 0; n < 8; n++) {
+                if (cubeFlags[n].flag) { cubeIndex |= 1 << n; }
+            }
 
             if (edgeTable[cubeIndex] == 0)
                 return;
 
-            float3[] edgeCutList = new float3[12];
+            float3[12] edgeCutList = new float3[12];
 
-            if ((edgeTable[cubeIndex] & 1) == 1)
-                edgeCutList[0] = interpolateVertices(thresholdValue, cubeFlags[0].position, cubeFlags[1].position, cubeFlags[0].fieldValue, cubeFlags[1].fieldValue);
-
-            if ((edgeTable[cubeIndex] & 2) == 2)
-                edgeCutList[1] = interpolateVertices(thresholdValue, cubeFlags[1].position, cubeFlags[2].position, cubeFlags[1].fieldValue, cubeFlags[2].fieldValue);
-
-            if ((edgeTable[cubeIndex] & 4) == 4)
-                edgeCutList[2] = interpolateVertices(thresholdValue, cubeFlags[2].position, cubeFlags[3].position, cubeFlags[2].fieldValue, cubeFlags[3].fieldValue);
-
-            if ((edgeTable[cubeIndex] & 8) == 8)
-                edgeCutList[3] = interpolateVertices(thresholdValue, cubeFlags[3].position, cubeFlags[0].position, cubeFlags[3].fieldValue, cubeFlags[0].fieldValue);
-
-            if ((edgeTable[cubeIndex] & 16) == 16)
-                edgeCutList[4] = interpolateVertices(thresholdValue, cubeFlags[4].position, cubeFlags[5].position, cubeFlags[4].fieldValue, cubeFlags[5].fieldValue);
-
-            if ((edgeTable[cubeIndex] & 32) == 32)
-                edgeCutList[5] = interpolateVertices(thresholdValue, cubeFlags[5].position, cubeFlags[6].position, cubeFlags[5].fieldValue, cubeFlags[6].fieldValue);
-
-            if ((edgeTable[cubeIndex] & 64) == 64)
-                edgeCutList[6] = interpolateVertices(thresholdValue, cubeFlags[6].position, cubeFlags[7].position, cubeFlags[6].fieldValue, cubeFlags[7].fieldValue);
-
-            if ((edgeTable[cubeIndex] & 128) == 128)
-                edgeCutList[7] = interpolateVertices(thresholdValue, cubeFlags[7].position, cubeFlags[4].position, cubeFlags[7].fieldValue, cubeFlags[4].fieldValue);
-
-            if ((edgeTable[cubeIndex] & 256) == 256)
-                edgeCutList[8] = interpolateVertices(thresholdValue, cubeFlags[0].position, cubeFlags[4].position, cubeFlags[0].fieldValue, cubeFlags[4].fieldValue);
-
-            if ((edgeTable[cubeIndex] & 512) == 512)
-                edgeCutList[9] = interpolateVertices(thresholdValue, cubeFlags[1].position, cubeFlags[5].position, cubeFlags[1].fieldValue, cubeFlags[5].fieldValue);
-
-            if ((edgeTable[cubeIndex] & 1024) == 1024)
-                edgeCutList[10] = interpolateVertices(thresholdValue, cubeFlags[2].position, cubeFlags[6].position, cubeFlags[2].fieldValue, cubeFlags[6].fieldValue);
-
-            if ((edgeTable[cubeIndex] & 2048) == 2048)
-                edgeCutList[11] = interpolateVertices(thresholdValue, cubeFlags[3].position, cubeFlags[7].position, cubeFlags[3].fieldValue, cubeFlags[7].fieldValue);
-
-
+            for (int n = 0; n < 4; n++) {
+                if (edgeTable[cubeIndex] & (1 << n    ) != 0) // horizontal edges low
+                    edgeCutList[n    ] = interpolateVertices(thresholdValue, cubeFlags[n    ].position, cubeFlags[(n + 1) % 4    ].position, cubeFlags[n    ].fieldValue, cubeFlags[(n + 1) % 4    ].fieldValue);
+                if (edgeTable[cubeIndex] & (1 << n + 4) != 0) // horizontal edges high
+                    edgeCutList[n + 4] = interpolateVertices(thresholdValue, cubeFlags[n + 4].position, cubeFlags[(n + 1) % 4 + 4].position, cubeFlags[n + 4].fieldValue, cubeFlags[(n + 1) % 4 + 4].fieldValue);
+                if (edgeTable[cubeIndex] & (1 << n + 8) != 0) // vertical edges
+                    edgeCutList[n + 8] = interpolateVertices(thresholdValue, cubeFlags[n    ].position, cubeFlags[ n          + 4].position, cubeFlags[n    ].fieldValue, cubeFlags[ n          + 4].fieldValue);
+            }
 
             //for (int l = 0; triTable[cubeIndex, l] != -1; l += 3)
             for (int l = 0; triTableOneDim[cubeIndex * 16 + l] != -1; l += 3)
@@ -265,6 +208,22 @@ public class MarchingCubes : MonoBehaviour
 
                 triangleQueueWriter.Enqueue(triangle);
             }
+        }
+        
+        private NativeArray<flagNode> GetCubeFlags(int i, int j, int k) {
+
+            NativeArray<flagNode> cubeFlags = new NativeArray<flagNode>(8, Allocator.Temp);
+
+            cubeFlags[0] = flagList[GetLinearIndex(i, j, k)];
+            cubeFlags[1] = flagList[GetLinearIndex(i + 1, j, k)];
+            cubeFlags[2] = flagList[GetLinearIndex(i + 1, j + 1, k)];
+            cubeFlags[3] = flagList[GetLinearIndex(i, j + 1, k)];
+            cubeFlags[4] = flagList[GetLinearIndex(i, j, k + 1)];
+            cubeFlags[5] = flagList[GetLinearIndex(i + 1, j, k + 1)];
+            cubeFlags[6] = flagList[GetLinearIndex(i + 1, j + 1, k + 1)];
+            cubeFlags[7] = flagList[GetLinearIndex(i, j + 1, k + 1)];
+
+            return cubeFlags;
         }
     }
 
