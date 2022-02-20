@@ -33,6 +33,7 @@ public class FluidBallHandler : MonoBehaviour
         marchingCubes.GetComponent<Potential>().RegisterCharge(pointCharge);
     }
 
+    
     private void OnTriggerEnter(Collider collider)
     {
         if (collider.gameObject.name == "Floor")

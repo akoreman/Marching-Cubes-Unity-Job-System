@@ -57,6 +57,7 @@ public class Setup : MonoBehaviour
     void LateUpdate()
     {
         marchingCubes.GetComponent<MarchingCubes>().triangleListModificationJobHandle.Complete();
+
         CreateVertexIndexNormalListsFromTriangles(triangleQueue, ref vertexList, ref indexList, ref normalList, ref vertexDict);
 
         triangleQueue.Dispose();
@@ -71,6 +72,7 @@ public class Setup : MonoBehaviour
         meshGameObject.GetComponent<MeshFilter>().mesh = mesh;
     }
 
+    // This function calls the function to recalculate the underlying scalar field, creates the lists and dictionaries to store the mesh in and calls the function to create a NativeQueue with all the triangles of the mesh.
     void  UpdateMesh()
     {
         marchingCubes.GetComponent<Potential>().BuildScalarField(nX, nY, nZ, gridSize);
@@ -86,7 +88,7 @@ public class Setup : MonoBehaviour
         marchingCubes.GetComponent<MarchingCubes>().GetVerticesFromField(marchingCubes.GetComponent<Potential>().scalarField, thresholdValue);
     }
 
-    // This function takes a List<Vector3> of vectors and returns an array of Vector3's for sending to a mesh as normals.
+    // This function takes a List<Vector3> of vectors and returns an array of normalized Vector3's for sending to a mesh as normals.
     Vector3[] NormalizedArrayFromList(List<Vector3> input)
     {
         Vector3[] output = new Vector3[input.Count];
@@ -94,6 +96,7 @@ public class Setup : MonoBehaviour
         for (int i = 0; i < input.Count; i++)
         {
             Vector3 normal = new Vector3();
+
             normal.x = input[i].x;
             normal.y = input[i].y;
             normal.z = input[i].z;
@@ -104,7 +107,7 @@ public class Setup : MonoBehaviour
         return output;
     }
 
-    // This function takes the NativeQueue filled with all the triangles of a mesh and adds welded vertices, indices and interpolated normals to the respective lists.
+    // This function takes the NativeQueue filled with all the triangles of a mesh and adds welded vertices, indices and summed vertex normals to the respective lists.
     void CreateVertexIndexNormalListsFromTriangles(NativeQueue<Triangle> triangleList, ref List<Vector3> vertexList, ref List<int> indexList, ref List<Vector3> normalList, ref Dictionary<Vector3, int> vertexDictionary)
     {
         while(triangleList.Count > 0)
@@ -117,6 +120,9 @@ public class Setup : MonoBehaviour
             Vector3 triangleNormal = Vector3.Cross(edge1, edge0).normalized;
 
             // FOR WELDED VERTICES
+            // For each vertex in the queue we chech whether it already exists in the dictionary, if so the correct index is added to the indexlist.
+            // if not the vertex is added to the dictionary.
+            // Normal vectors for vertices are summed for all faces they contribute to, these are later normalized to act as the interpolated vertex normals.
             if (vertexWelding)
             {
                 int vertexCount = vertexList.Count;

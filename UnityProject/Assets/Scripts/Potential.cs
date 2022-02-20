@@ -2,12 +2,22 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-// Handles the construction and updating of the scalar field.
+using UnityEngine.Jobs;
+using Unity.Collections;
+using Unity.Burst;
+using Unity.Jobs;
+using Unity.Mathematics;
 
+
+// Handles the construction and updating of the scalar field.
 public class Potential : MonoBehaviour
 {
     List<PointCharge> chargesInScene = new List<PointCharge>();
-    public List<ScalarFieldPoint> scalarField = new List<ScalarFieldPoint>();
+    public ScalarFieldPoint[] scalarField;
+    public NativeHashMap<int, ScalarFieldPoint> scalarFieldMap;
+
+    public UpdatePotentialJob potentialModificationJob;
+    public JobHandle potentialModificationJobHandle;
 
     public float fieldExponent = 1.0f;
 
@@ -21,38 +31,109 @@ public class Potential : MonoBehaviour
         chargesInScene.Remove(input);
     }
 
-    // Flatten the 3D scalar field into a 1D array.
     public void BuildScalarField(int nX, int nY, int nZ, float gridSize)
     {
-        scalarField.Clear();
+        scalarField = new ScalarFieldPoint[nX * nY * nZ];
+        scalarFieldMap = new NativeHashMap<int, ScalarFieldPoint>(nX * nY * nZ, Allocator.TempJob);
 
-        for (int i = 0; i < nX; i++)
-            for (int j = 0; j < nY; j++)
-                for (int k = 0; k < nZ; k++)
-                {
-                    ScalarFieldPoint scalarFieldPoint;
+        NativeArray<PointCharge> chargesInScenNative = new NativeArray<PointCharge>(chargesInScene.Count, Allocator.TempJob);
 
-                    scalarFieldPoint.position = new Vector3(i * gridSize, j * gridSize, k * gridSize);
-                    scalarFieldPoint.potential = GetPotential(scalarFieldPoint.position);
-                    
-                    scalarField.Add(scalarFieldPoint);
-                }
+        for (int i = 0; i < chargesInScene.Count; i++)
+            chargesInScenNative[i] = chargesInScene[i];
 
+        potentialModificationJob = new UpdatePotentialJob()
+        {
+            nX = nX,
+            nY = nY,
+            nZ = nZ,
+            gridSize = gridSize,
+            chargesInScene = chargesInScenNative,
+            ScalarFieldWriter = scalarFieldMap.AsParallelWriter(),
+            fieldExponent = fieldExponent
+        };
+
+        potentialModificationJobHandle = potentialModificationJob.Schedule(nX * nY * nZ, default);
+
+        potentialModificationJobHandle.Complete();
+
+        for (int i = 0; i < (nX * nY * nZ); i++)
+            scalarField[i] = scalarFieldMap[i];
+
+        chargesInScenNative.Dispose();
+        scalarFieldMap.Dispose();
     }
 
-    public float GetPotential(Vector3 Position)
+    [BurstCompile(FloatPrecision.Standard, FloatMode.Fast, CompileSynchronously = true)]
+    public struct UpdatePotentialJob : IJobParallelFor
     {
-        float potential = 0;
+        [ReadOnly]
+        public int nX;
 
-        // Choose between 1/r and 1/r^2 drop-off.
-        foreach (PointCharge x in chargesInScene)
+        [ReadOnly]
+        public int nY;
+
+        [ReadOnly]
+        public int nZ;
+
+        [ReadOnly]
+        public float gridSize;
+
+        [ReadOnly]
+        public NativeArray<PointCharge> chargesInScene;
+
+        [WriteOnly]
+        public NativeHashMap<int, ScalarFieldPoint>.ParallelWriter ScalarFieldWriter;
+
+        [ReadOnly]
+        public float fieldExponent;
+
+        public void Execute(int i)
         {
-            potential += x.charge / Mathf.Pow((Position - x.position).magnitude, fieldExponent);
+            BuildScalarField(i);
         }
 
-        return potential;
-    }
+        float GetPotential(Vector3 Position)
+        {
+            float potential = 0;
 
+            foreach (PointCharge x in chargesInScene)
+            {
+                potential += x.charge / Mathf.Pow((Position - x.position).magnitude, fieldExponent);
+            }
+
+            return potential;
+        }
+
+        void BuildScalarField(int i)
+        {
+            Position position = GetCoordsFromLinear(i);
+
+            ScalarFieldPoint scalarFieldPoint;
+
+            scalarFieldPoint.position = new Vector3(position.x * gridSize, position.y * gridSize, position.z * gridSize);
+            scalarFieldPoint.potential = GetPotential(scalarFieldPoint.position);
+
+            ScalarFieldWriter.TryAdd(i, scalarFieldPoint);           
+        }
+
+        struct Position
+        {
+            public int x;
+            public int y;
+            public int z;
+        }
+
+        Position GetCoordsFromLinear(int index)
+        {
+            Position output;
+
+            output.x = index / (nY * nZ);
+            output.y = (index % (nY * nZ)) / nZ ;
+            output.z = index % nZ;
+
+            return output;
+        }
+    }
 }
 
 
@@ -61,20 +142,6 @@ public struct ScalarFieldPoint
     public Vector3 position;
     public float potential;
 }
-
-/*
-public class PointCharge
-{
-    public Vector3 position;
-    public float charge;
-
-    public PointCharge(Vector3 position, float charge)
-    {
-        this.position = position;
-        this.charge = charge;
-    }
-}
-*/
 
 public struct PointCharge
 {

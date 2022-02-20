@@ -2,7 +2,6 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System;
-
 using System.IO;
 
 using UnityEngine.Jobs;
@@ -14,6 +13,7 @@ using Unity.Mathematics;
 
 // This script returns a queue of triangles given a scalar field using the marching cubes algorithm.
 // In part following http://paulbourke.net/geometry/polygonise/ .
+
 public class MarchingCubes : MonoBehaviour
 {
     public bool vertexInterpolation = true;
@@ -29,7 +29,7 @@ public class MarchingCubes : MonoBehaviour
 
     public NativeArray<flagNode> flagList;
 
-    public void GetVerticesFromField(List<ScalarFieldPoint> scalarField, float thresholdValue)
+    public void GetVerticesFromField(ScalarFieldPoint[] scalarField, float thresholdValue)
     {
         marchingCubes = this.gameObject;
 
@@ -39,6 +39,8 @@ public class MarchingCubes : MonoBehaviour
 
         flagList = new NativeArray<flagNode>(nX * nY * nZ, Allocator.TempJob);
 
+        // For each point at which the scalar field is defined set a flag whether the field is above or below 
+        // a threshold value at that point.
         for (int i = 0; i < nX * nY * nZ; i++)
         {
             flagNode flag;
@@ -111,7 +113,7 @@ public class MarchingCubes : MonoBehaviour
             return output;
         }
         
-        public int GetLinearIndex(int i, int j, int k)
+        int GetLinearIndex(int i, int j, int k)
         {
             int output = i * nY * nZ + j * nZ + k;
 
@@ -153,7 +155,7 @@ public class MarchingCubes : MonoBehaviour
         }
         
 
-        public void AddVerticesFromCubeToQueue(int i, int j, int k)
+        void AddVerticesFromCubeToQueue(int i, int j, int k)
         {
             int cubeIndex = 0;
 
