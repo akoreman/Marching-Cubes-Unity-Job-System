@@ -1,6 +1,6 @@
 # Marching Cubes
 
-Implementation of the marching cubes algorithm to visualise isolines of scalar fields.  Implemented using Unity3D and multithreaded using the Unity Job System with the Unity Burst compiler.
+Implementation of the marching cubes algorithm to visualise isolines of scalar fields.  Implemented using Unity3D and multithreaded using the Unity Job System with the Unity Burst compiler. For the fluid stream benchmark scene using the jobsystem increases the framerate from +/- 25 fps to +/- 85 fps on an Intel i7 11700 CPU. Currently the scripts are setup to recalculate the complete mesh every frame for benchmarking purposes.
 
 **Currently implemented:**
 
