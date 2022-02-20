@@ -104,9 +104,9 @@ public class MarchingCubes : MonoBehaviour
         {
             Position output;
 
-            output.x = index / (nY * nZ);
-            output.y = (index % (nY * nZ)) / nZ;
-            output.z = index % nZ; 
+            output.x = index / ((nY-1) * (nZ-1));
+            output.y = (index % ((nY-1) * (nZ-1))) / (nZ-1);
+            output.z = index % (nZ-1);
 
             return output;
         }
