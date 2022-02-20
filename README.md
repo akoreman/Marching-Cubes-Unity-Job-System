@@ -21,8 +21,8 @@ Implementation of the marching cubes algorithm to visualise isolines of scalar f
 
 **Stream of metaballs for a fluid like effect**
 
-<img src="https://raw.github.com/akoreman/Marching-Cubes-Metaballs/main/images/fluid.gif" width="400">
+<img src="https://raw.github.com/akoreman/Marching-Cubes-Metaballs/main/images/FluidJitter.gif" width="400">  
 
-**Adding some randomness for a more natural effect**
+**The two most resource-intensive tasks scheduled to the pool of workers**
 
-<img src="https://raw.github.com/akoreman/Marching-Cubes-Metaballs/main/images/FluidJitter.gif" width="400">
+<img src="https://raw.github.com/akoreman/Marching-Cubes-Metaballs/main/images/profiler.png" width="400"> 
