@@ -9,7 +9,7 @@ using Unity.Jobs;
 using Unity.Mathematics;
 
 
-// Handles the construction and updating of the scalar field.
+// Handles the construction and updating of the scalar field using the Job system.
 public class Potential : MonoBehaviour
 {
     List<PointCharge> chargesInScene = new List<PointCharge>();
@@ -41,6 +41,7 @@ public class Potential : MonoBehaviour
         for (int i = 0; i < chargesInScene.Count; i++)
             chargesInScenNative[i] = chargesInScene[i];
 
+        // Create the job instance which handles the updating of the scalar field.
         potentialModificationJob = new UpdatePotentialJob()
         {
             nX = nX,
@@ -63,6 +64,7 @@ public class Potential : MonoBehaviour
         scalarFieldMap.Dispose();
     }
 
+    // The job which handles the scalar field construction.
     [BurstCompile(FloatPrecision.Standard, FloatMode.Fast, CompileSynchronously = true)]
     public struct UpdatePotentialJob : IJobParallelFor
     {

@@ -2,6 +2,9 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+// This script handles the behaviour of moving point charges, initiates them and destroys them at the 
+// rigth time. The balls movement is controlled by its rigidbody component.
+
 public class FluidBallHandler : MonoBehaviour
 {
     GameObject marchingCubes;

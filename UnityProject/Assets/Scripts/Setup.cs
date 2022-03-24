@@ -28,6 +28,7 @@ public class Setup : MonoBehaviour
  
     public NativeQueue<Triangle> triangleQueue;
 
+    // Lists for handling the vertices DOTS style.
     List<Vector3> vertexList;
     Dictionary<Vector3, int> vertexDict;
     List<Vector3> normalList;
@@ -56,6 +57,7 @@ public class Setup : MonoBehaviour
 
     void LateUpdate()
     {
+        // Wait untill the mesh creation job is completed.
         marchingCubes.GetComponent<MarchingCubes>().triangleListModificationJobHandle.Complete();
 
         CreateVertexIndexNormalListsFromTriangles(triangleQueue, ref vertexList, ref indexList, ref normalList, ref vertexDict);
@@ -72,7 +74,9 @@ public class Setup : MonoBehaviour
         meshGameObject.GetComponent<MeshFilter>().mesh = mesh;
     }
 
-    // This function calls the function to recalculate the underlying scalar field, creates the lists and dictionaries to store the mesh in and calls the function to create a NativeQueue with all the triangles of the mesh.
+    // This function calls the function to recalculate the underlying scalar field,
+    // creates the lists and dictionaries to store the mesh in and calls the function
+    // to create a NativeQueue with all the triangles of the mesh.
     void  UpdateMesh()
     {
         marchingCubes.GetComponent<Potential>().BuildScalarField(nX, nY, nZ, gridSize);

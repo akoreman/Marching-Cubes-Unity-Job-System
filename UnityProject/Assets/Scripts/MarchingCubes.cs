@@ -11,7 +11,8 @@ using Unity.Jobs;
 using System.Threading.Tasks;
 using Unity.Mathematics;
 
-// This script returns a queue of triangles given a scalar field using the marching cubes algorithm.
+// This script returns a queue of triangles given a scalar field using the marching cubes algorithm
+// and the Unity Job system.
 // In part following http://paulbourke.net/geometry/polygonise/ .
 
 public class MarchingCubes : MonoBehaviour
@@ -50,6 +51,7 @@ public class MarchingCubes : MonoBehaviour
             flagList[i] = flag;
         }
 
+        // Job instance which handles the construction of the mesh.
         triangleListModificationJob = new UpdateTriangleListJob()
         {
             nX = nX,
@@ -64,6 +66,7 @@ public class MarchingCubes : MonoBehaviour
         triangleListModificationJobHandle = triangleListModificationJob.Schedule((nX - 1) * (nY - 1) * (nZ - 1), default);
     }
 
+    // Job which handles the construction of the mesh.
     [BurstCompile(FloatPrecision.Standard, FloatMode.Fast, CompileSynchronously = true)]
     public struct UpdateTriangleListJob : IJobParallelFor
     {
@@ -102,6 +105,7 @@ public class MarchingCubes : MonoBehaviour
             public int z;
         }
         
+        // The job iterator uses a 1D index, convert this index to the 3D coordinate system we defined.
         Position GetCoordsFromLinear(int index)
         {
             Position output;
@@ -113,6 +117,7 @@ public class MarchingCubes : MonoBehaviour
             return output;
         }
         
+        // Convert back from the 3D coordinate system to the linear index.
         int GetLinearIndex(int i, int j, int k)
         {
             int output = i * nY * nZ + j * nZ + k;
@@ -120,6 +125,8 @@ public class MarchingCubes : MonoBehaviour
             return output;
         }
         
+        // If vertexInterpolation == True, linearly interpolate the vertices depending on the value of the 
+        // scalar field at that point. Else just take the midpoint.
         float3 interpolateVertices(float thresholdValue, Vector3 vertex0, Vector3 vertex1, float fieldValue0, float fieldValue1)
         {
             float3 returnVector = new float3(0f, 0f, 0f);
@@ -154,25 +161,26 @@ public class MarchingCubes : MonoBehaviour
 
         }
         
-
+        // Returns the vertices for a specific cube within the scalar field.
         void AddVerticesFromCubeToQueue(int i, int j, int k)
         {
             int cubeIndex = 0;
 
+            // For each point of the cube check whether the field at that point is above or below
+            // the threshold value.
             NativeArray<flagNode> cubeFlags = GetCubeFlags(i, j, k);
 
             // a |= b shorthand for a = a | b with | the bitwise OR operator.
             // 1 << n bitshifts the number 1 (0b_0000_0001) n bits to the left
             for (int n = 0; n < 8; n++)
-            {
                 if (cubeFlags[n].flag) { cubeIndex |= 1 << n; }
-            }
 
             if (edgeTable[cubeIndex] == 0)
                 return;
 
             NativeArray<float3> edgeCutList = new NativeArray<float3>(12, Allocator.Temp);
 
+            // Given the flags lookup which edges need to be given vertices.
             for (int n = 0; n < 4; n++)
             {
                 if ((edgeTable[cubeIndex] & (1 << n)) != 0) // horizontal edges low
@@ -183,6 +191,7 @@ public class MarchingCubes : MonoBehaviour
                     edgeCutList[n + 8] = interpolateVertices(thresholdValue, cubeFlags[n].position, cubeFlags[n + 4].position, cubeFlags[n].fieldValue, cubeFlags[n + 4].fieldValue);
             }
 
+            // Add the triangles to the queue.
             for (int l = 0; triTableOneDim[cubeIndex * 16 + l] != -1; l += 3)
             {
                 Triangle triangle;
@@ -216,7 +225,7 @@ public class MarchingCubes : MonoBehaviour
         }
     }
 
-    // Table from http://paulbourke.net/geometry/polygonise/ .
+    // Lookup table from http://paulbourke.net/geometry/polygonise/ .
     static readonly int[] edgeTable = new int [] {
     0x0  , 0x109, 0x203, 0x30a, 0x406, 0x50f, 0x605, 0x70c,
     0x80c, 0x905, 0xa0f, 0xb06, 0xc0a, 0xd03, 0xe09, 0xf00,
@@ -251,7 +260,7 @@ public class MarchingCubes : MonoBehaviour
     0xf00, 0xe09, 0xd03, 0xc0a, 0xb06, 0xa0f, 0x905, 0x80c,
     0x70c, 0x605, 0x50f, 0x406, 0x30a, 0x203, 0x109, 0x0   };
 
-    // One-dimensional version of the table from http://paulbourke.net/geometry/polygonise/ .
+    // One-dimensional version of the lookup table from http://paulbourke.net/geometry/polygonise/ .
     static readonly int[] triTableOneDim = new int[]
     { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
     0, 8, 3, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
