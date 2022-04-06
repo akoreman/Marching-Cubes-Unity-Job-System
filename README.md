@@ -5,7 +5,8 @@ Implementation of the marching cubes algorithm to visualise isolines of scalar f
 **Currently implemented:**
 
 - 3D marching cubes for visualising scalar fields, mesh generation optimization by using the Unity C# Job System and Burst compiler.
-- Toggleable vertex welding and normal interpolation by using dictionary lookups.
+- System to construct scalar fields by adding variable strength point charges to the scene.
+- Toggleable vertex welding and normal interpolation by using dictionaries.
 - Toggleable vertex interpolation to switch between "voxel" look and smooth look.
 - Support for varying cube size and number for speed/resolution trade-off.
 - Support for varying scalar field drop-off for the ball charges to control interaction range.
